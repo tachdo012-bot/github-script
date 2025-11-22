@@ -1,0 +1,141 @@
+-- SaikytiteoMain.lua
+-- Auto Parry + GUI “Saikytiteo”
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- Auto Parry
+local AutoParryState = false
+local reactionTime = 0.03
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SaikytiteoAutoParryGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 150)
+Frame.Position = UDim2.new(0.05, 0, 0.2, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 28)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Saikytiteo"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 24
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Frame
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 200, 0, 50)
+ToggleButton.Position = UDim2.new(0, 25, 0, 40)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+ToggleButton.Text = "OFF"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 22
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Parent = Frame
+
+ToggleButton.MouseButton1Click:Connect(function()
+    AutoParryState = not AutoParryState
+    if AutoParryState then
+        ToggleButton.Text = "ON"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 180, 60)
+    else
+        ToggleButton.Text = "OFF"
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+    end
+end)
+
+local SliderLabel = Instance.new("TextLabel")
+SliderLabel.Size = UDim2.new(1, 0, 0, 20)
+SliderLabel.Position = UDim2.new(0, 0, 0, 100)
+SliderLabel.BackgroundTransparency = 1
+SliderLabel.Text = "Reaction Time"
+SliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SliderLabel.Font = Enum.Font.Gotham
+SliderLabel.TextSize = 16
+SliderLabel.Parent = Frame
+
+local SliderBar = Instance.new("Frame")
+SliderBar.Size = UDim2.new(0, 200, 0, 20)
+SliderBar.Position = UDim2.new(0, 25, 0, 120)
+SliderBar.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+SliderBar.BorderSizePixel = 0
+SliderBar.Parent = Frame
+
+local Handle = Instance.new("Frame")
+Handle.Size = UDim2.new(0, 20, 1, 0)
+Handle.Position = UDim2.new(0.5, 0, 0, 0)
+Handle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+Handle.BorderSizePixel = 0
+Handle.Parent = SliderBar
+
+local dragging = false
+Handle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+    end
+end)
+Handle.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local x = math.clamp(input.Position.X - SliderBar.AbsolutePosition.X, 0, SliderBar.AbsoluteSize.X)
+        Handle.Position = UDim2.new(0, x, 0, 0)
+        reactionTime = 0.01 + (0.05 * (1 - x / SliderBar.AbsoluteSize.X))
+    end
+end)
+
+local MiniButton = Instance.new("TextButton")
+MiniButton.Size = UDim2.new(0, 40, 0, 40)
+MiniButton.Position = UDim2.new(1, -45, 0, 5)
+MiniButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MiniButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MiniButton.Text = "S"
+MiniButton.Font = Enum.Font.GothamBold
+MiniButton.TextSize = 24
+MiniButton.Parent = Frame
+
+local isMinimized = false
+MiniButton.MouseButton1Click:Connect(function()
+    if not isMinimized then
+        Frame.Size = UDim2.new(0, 60, 0, 40)
+        Title.Visible = false
+        ToggleButton.Visible = false
+        SliderLabel.Visible = false
+        SliderBar.Visible = false
+        Handle.Visible = false
+        isMinimized = true
+    else
+        Frame.Size = UDim2.new(0, 250, 0, 150)
+        Title.Visible = true
+        ToggleButton.Visible = true
+        SliderLabel.Visible = true
+        SliderBar.Visible = true
+        Handle.Visible = true
+        isMinimized = false
+    end
+end)
+
+-- Auto Parry loop (mình chưa viết phần hitbox, để bạn tự thêm)
+RunService.Heartbeat:Connect(function()
+    if AutoParryState then
+        -- Đây là chỗ bạn đặt logic để parry
+        task.wait(reactionTime)
+        -- Ví dụ: gọi hàm parry
+    end
+end)
